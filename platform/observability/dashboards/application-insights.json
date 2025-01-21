@@ -1,0 +1,45 @@
+{
+  "title": "Application Insights",
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "graph",
+      "datasource": "Tempo",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count[5m])) by (service)"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate",
+      "type": "graph",
+      "datasource": "Tempo",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{status_code=~\"5..\"}[5m])) by (service)"
+        }
+      ]
+    },
+    {
+      "title": "Log Volume",
+      "type": "graph",
+      "datasource": "Loki",
+      "targets": [
+        {
+          "expr": "sum(count_over_time({app=~\".+\"} [5m])) by (app)"
+        }
+      ]
+    },
+    {
+      "title": "LLM Inference Latency",
+      "type": "graph",
+      "datasource": "Tempo",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(llm_inference_duration_seconds_bucket[5m])) by (le, model))"
+        }
+      ]
+    }
+  ]
+}

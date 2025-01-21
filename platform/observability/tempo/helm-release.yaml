@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: tempo
+  namespace: observability
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: tempo
+      version: ">=1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  values:
+    tempo:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
+            http:
+              endpoint: "0.0.0.0:4318"
+      storage:
+        trace:
+          backend: s3
+          s3:
+            bucket: tempo-traces
+            endpoint: minio.storage:9000
+            access_key: minioadmin  # Use secrets in production
+            secret_key: minioadmin
+            insecure: true
+      retention: 336h  # 14 days
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
+    serviceMonitor:
+      enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "16686"

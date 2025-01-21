@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - cratedb/helm-release.yaml
+  - ollama/helm-release.yaml
+
+commonLabels:
+  app.kubernetes.io/component: ai-stack
+
+configMapGenerator:
+  - name: ai-config
+    literals:
+      - OLLAMA_HOST=ollama.ai-stack:11434
+      - CRATEDB_HOST=cratedb.ai-stack:5432

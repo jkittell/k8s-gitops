@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: langchain-app
+  namespace: ai-stack
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: ./chart
+      sourceRef:
+        kind: GitRepository
+        name: langchain-app
+        namespace: flux-system
+      interval: 1m
+  values:
+    image:
+      repository: langchain-app
+      tag: latest  # This will be updated by Flux
+    replicaCount: 1
+    monitoring:
+      enabled: true

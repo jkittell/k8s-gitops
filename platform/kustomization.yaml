@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - sources.yaml
+  - storage
+  - backup
+  - ai
+  - monitoring
+  - observability
+
+commonLabels:
+  app.kubernetes.io/part-of: ai-platform

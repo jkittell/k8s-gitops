@@ -1,0 +1,45 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: loki-alert-rules
+  namespace: observability
+spec:
+  groups:
+    - name: loki.rules
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            sum(rate({app=~".+"} |~ "error|Error|ERROR" [5m])) by (app)
+            /
+            sum(rate({app=~".+"} [5m])) by (app)
+            > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High error rate detected
+            description: "{{ $labels.app }} has a high error rate (above 5%)"
+
+        - alert: LLMInferenceLatencyHigh
+          expr: |
+            histogram_quantile(0.95, sum(rate(llm_inference_duration_seconds_bucket[5m])) by (le, model))
+            > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: LLM inference latency is high
+            description: "95th percentile latency for {{ $labels.model }} is above 5 seconds"
+
+        - alert: HighMemoryUsage
+          expr: |
+            container_memory_usage_bytes{container!=""} 
+            / 
+            container_spec_memory_limit_bytes{container!=""} 
+            > 0.9
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High memory usage detected
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 90% of its memory limit"
