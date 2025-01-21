@@ -4,10 +4,8 @@ kind: Kustomization
 resources:
   - sources.yaml
   - storage
-  - backup
   - ai
   - monitoring
-  - observability
 
 commonLabels:
   app.kubernetes.io/part-of: ai-platform
